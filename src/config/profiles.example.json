@@ -1,0 +1,140 @@
+{
+  "courses": [
+    {
+      "id": "diamond-ridge-woodlands",
+      "code": "B1",
+      "name": "Diamond Ridge & The Woodlands",
+      "city": "Windsor Mill",
+      "region": "Baltimore County",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=4169&course_id=20277&schedule_ids[]=4169&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/20277/4169#/teetimes?date={date}",
+      "primeWindowHours": [7, 11],
+      "lat": 39.3278,
+      "lon": -76.7771
+    },
+    {
+      "id": "fox-hollow-golf-course",
+      "code": "B2",
+      "name": "Fox Hollow Golf Course",
+      "city": "Timonium",
+      "region": "Baltimore County",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=4170&course_id=20278&schedule_ids[]=4170&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/20278/4170#/teetimes?date={date}",
+      "primeWindowHours": [1, 23],
+      "lat": 39.4633,
+      "lon": -76.6164
+    },
+    {
+      "id": "greystone-golf-course",
+      "code": "B3",
+      "name": "Greystone Golf Course",
+      "city": "White Hall",
+      "region": "Baltimore County",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=4168&course_id=20276&schedule_ids[]=4168&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/20276/4168#/teetimes?date={date}",
+      "primeWindowHours": [1, 23],
+      "lat": 39.6344,
+      "lon": -76.6079
+    },
+    {
+      "id": "rocky-point-golf-course",
+      "code": "B4",
+      "name": "Rocky Point Golf Course",
+      "city": "Essex",
+      "region": "Baltimore County",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=4171&course_id=20279&schedule_ids[]=4171&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/20279/4171#/teetimes?date={date}",
+      "primeWindowHours": [1, 23],
+      "lat": 39.2501,
+      "lon": -76.4134
+    },
+    {
+      "id": "fairway-hills-golf-club",
+      "code": "H1",
+      "name": "Fairway Hills Golf Club",
+      "city": "Columbia",
+      "region": "Howard County",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=2572&course_id=19823&schedule_ids[]=2572&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/19823/2572#/teetimes?date={date}",
+      "primeWindowHours": [7, 11],
+      "lat": 39.2360,
+      "lon": -76.8438
+    },
+    {
+      "id": "pb-dye-golf-club",
+      "code": "F1",
+      "name": "The Club at P.B. Dye",
+      "city": "Ijamsville",
+      "region": "Frederick County",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=2477&course_id=19774&schedule_ids[]=2477&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/19774/2477#/teetimes?date={date}",
+      "primeWindowHours": [7, 11],
+      "lat": 39.2905,
+      "lon": -77.3392
+    },
+    {
+      "id": "bulle-rock-golf-course",
+      "code": "A1",
+      "name": "Bulle Rock Golf Course",
+      "city": "Havre de Grace",
+      "region": "Harford County",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=2598&course_id=19835&schedule_ids[]=2598&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/19835/2598#/teetimes?date={date}",
+      "primeWindowHours": [7, 11],
+      "lat": 39.5432,
+      "lon": -76.1324
+    },
+    {
+      "id": "chesapeake-hills-golf-course",
+      "code": "C1",
+      "name": "Chesapeake Hills Golf Course",
+      "city": "Lusby",
+      "region": "Calvert County",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=9615&schedule_ids[]=9615&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/22019#/teetimes?date={date}",
+      "primeWindowHours": [7, 11],
+      "lat": 38.3830,
+      "lon": -76.4297
+    },
+    {
+      "id": "penn-national-founders",
+      "code": "P1",
+      "name": "Penn National — Founders Course",
+      "city": "Fayetteville",
+      "region": "Franklin County, PA",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=9919&course_id=22134&schedule_ids[]=9919&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/22134/9919#/teetimes?date={date}",
+      "primeWindowHours": [7, 11],
+      "lat": 39.8668,
+      "lon": -77.5540
+    },
+    {
+      "id": "penn-national-iron-forge",
+      "code": "P2",
+      "name": "Penn National — Iron Forge Course",
+      "city": "Fayetteville",
+      "region": "Franklin County, PA",
+      "queryUrl": "https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players={players}&booking_class=0&schedule_id=9920&course_id=22134&schedule_ids[]=9920&api_key=no_limits",
+      "bookingUrl": "https://foreupsoftware.com/index.php/booking/22134/9920#/teetimes?date={date}",
+      "primeWindowHours": [7, 11],
+      "lat": 39.8668,
+      "lon": -77.5540
+    }
+  ],
+  "profiles": [
+    {
+      "discordUserId": "YOUR_DISCORD_USER_ID",
+      "discordUsername": "your_username",
+      "enabled": false,
+      "daysOfWeek": ["Saturday", "Sunday"],
+      "timeRange": ["07:00", "10:30"],
+      "players": 4,
+      "courseIds": [
+        "diamond-ridge-woodlands",
+        "rocky-point-golf-course"
+      ],
+      "golfPartners": [],
+      "bookedDates": []
+    }
+  ]
+}
