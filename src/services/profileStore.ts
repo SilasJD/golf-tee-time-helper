@@ -11,6 +11,7 @@ export interface ProfileConfig {
   timeRange: [string, string];
   daysOfWeek: string[];
   players: number;
+  rainThreshold?: number;   // suppress alerts when rain chance exceeds this %
   golfPartners?: string[];  // Discord user IDs to notify when a tee time is booked
   bookedDates?: string[];   // ISO dates ("YYYY-MM-DD") paused from notifications
 }
@@ -53,6 +54,10 @@ export const addOrUpdateProfile = (
   profile: ProfileConfig,
   path = configPath
 ): ProfileConfig => {
+  const today = new Date().toISOString().slice(0, 10);
+  if (profile.bookedDates) {
+    profile.bookedDates = profile.bookedDates.filter((d) => d >= today);
+  }
   const config = loadConfig(path);
   const idx = config.profiles.findIndex(
     (p) => p.discordUserId === profile.discordUserId
@@ -77,6 +82,19 @@ export const addBookedDates = (
   const existing = new Set(config.profiles[idx].bookedDates ?? []);
   for (const d of dates) existing.add(d);
   config.profiles[idx].bookedDates = [...existing];
+  saveConfig(config, path);
+};
+
+export const removeBookedDates = (
+  discordUserId: string,
+  dates: string[],
+  path = configPath
+): void => {
+  const config = loadConfig(path);
+  const idx = config.profiles.findIndex((p) => p.discordUserId === discordUserId);
+  if (idx < 0) return;
+  const remove = new Set(dates);
+  config.profiles[idx].bookedDates = (config.profiles[idx].bookedDates ?? []).filter((d) => !remove.has(d));
   saveConfig(config, path);
 };
 

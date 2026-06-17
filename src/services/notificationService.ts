@@ -1,7 +1,8 @@
 import fetch from "node-fetch";
-import type { Client } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, type Client } from "discord.js";
 import type { ProfileConfig } from "./profileStore.js";
 import type { CourseSource } from "./courseSources.js";
+import type { PriceMap } from "./teeTimeMonitor.js";
 import {
   fetchCourseWeather,
   getHourWeather,
@@ -12,15 +13,45 @@ export interface NotificationService {
   notifyPrimeSlots(
     profile: ProfileConfig,
     course: CourseSource,
-    slots: string[]
+    slots: string[],
+    priceMap?: PriceMap
   ): Promise<void>;
 }
 
+const filterSlotsByRain = (
+  slots: string[],
+  forecasts: Map<string, HourlyForecast>,
+  threshold: number
+): string[] => {
+  const byDate = new Map<string, string[]>();
+  for (const slot of slots) {
+    const date = slot.slice(0, 10);
+    byDate.set(date, [...(byDate.get(date) ?? []), slot]);
+  }
+  return [...byDate.entries()]
+    .filter(([date, dateSlots]) => {
+      const w = getHourWeather(forecasts, date, dateSlots[0].slice(11));
+      return w == null || w.precipPct <= threshold;
+    })
+    .flatMap(([, dateSlots]) => dateSlots);
+};
+
+const formatPrice = (priceMap: PriceMap | undefined, slotKey: string): string => {
+  if (!priceMap) return "";
+  const p = priceMap.get(slotKey);
+  if (!p || p.green == null) return "";
+  const green = `$${Math.round(p.green)}`;
+  if (p.cart != null) return ` (${green} + $${Math.round(p.cart)} cart)`;
+  if (p.cartIncluded) return ` (${green} w/cart)`;
+  return ` (${green} walking)`;
+};
+
 const formatSlotsByDate = (
   slots: string[],
-  bookingUrl: string,
+  course: CourseSource,
   players: number,
-  forecasts: Map<string, HourlyForecast>
+  forecasts: Map<string, HourlyForecast>,
+  priceMap?: PriceMap
 ): string => {
   const byDate = new Map<string, string[]>();
   for (const slot of slots) {
@@ -42,24 +73,47 @@ const formatSlotsByDate = (
         weekday: "short", month: "short", day: "numeric",
       });
       const [yyyy, mm, dd] = date.split("-");
-      const foreupDate = `${mm}-${dd}-${yyyy}`;
-      const link = bookingUrl.replace("{date}", foreupDate);
+      const linkDate = course.platform === "teeitup" ? `${yyyy}-${mm}-${dd}` : `${mm}-${dd}-${yyyy}`;
+      const link = course.bookingUrl.replace("{date}", linkDate);
 
-      // Use weather at the earliest tee time that day
       const weather = getHourWeather(forecasts, date, times[0]);
       const weatherStr = weather
         ? ` · ${weather.condition} ${weather.tempF}°F · ${weather.precipPct}% rain`
         : "";
 
-      return `**${label}**${weatherStr}\n${times.join(", ")} — [Book now](${link})`;
+      const timeLines = times
+        .map((t) => `${t}${formatPrice(priceMap, `${date} ${t}`)}`)
+        .join(", ");
+
+      return `**${label}**${weatherStr}\n${timeLines} — [View tee times](${link})`;
     })
     .join("\n\n");
+};
+
+const buildBookButtons = (
+  slots: string[],
+  courseId: string
+): ActionRowBuilder<ButtonBuilder> | null => {
+  const uniqueDates = [...new Set(slots.map((s) => s.slice(0, 10)))].slice(0, 5);
+  if (uniqueDates.length === 0) return null;
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    uniqueDates.map((date) => {
+      const d = new Date(`${date}T12:00:00`);
+      const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      return new ButtonBuilder()
+        .setCustomId(`book|${courseId}|${date}`)
+        .setLabel(`Mark ${label} as Booked`)
+        .setEmoji("✅")
+        .setStyle(ButtonStyle.Success);
+    })
+  );
+  return row;
 };
 
 export const createNotificationService = (
   discordClient: Client | null
 ): NotificationService => ({
-  async notifyPrimeSlots(profile, course, slots) {
+  async notifyPrimeSlots(profile, course, slots, priceMap) {
     const players = profile.players ?? 4;
 
     const forecasts =
@@ -67,30 +121,34 @@ export const createNotificationService = (
         ? await fetchCourseWeather(course.id, course.lat, course.lon)
         : new Map<string, HourlyForecast>();
 
-    const slotLines = formatSlotsByDate(slots, course.bookingUrl, players, forecasts);
+    // Apply rain threshold filter per date
+    const threshold = profile.rainThreshold;
+    const activeSlots =
+      threshold != null && forecasts.size > 0
+        ? filterSlotsByRain(slots, forecasts, threshold)
+        : slots;
+
+    if (activeSlots.length === 0) {
+      console.log(`[notification] All slots suppressed by rain threshold (${threshold}%) for ${course.name}`);
+      return;
+    }
+
+    const slotLines = formatSlotsByDate(activeSlots, course, players, forecasts, priceMap);
     const mapsUrl = course.lat != null && course.lon != null
       ? `https://www.google.com/maps/dir/?api=1&destination=${course.lat},${course.lon}`
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(course.name + " " + course.city)}`;
     const messageText = `⛳ **${course.name}** *(${players} players)* · [Directions](${mapsUrl})\n\n${slotLines}`;
     console.log("[notification]", messageText.replace(/\*\*/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1"));
 
-    if (profile.discordUserId && discordClient?.isReady()) {
-      try {
-        const user = await discordClient.users.fetch(profile.discordUserId);
-        await user.send(`Hi ${profile.discordUsername},\n${messageText}`);
-        console.log(`[notification] DM sent to ${profile.discordUsername}`);
-      } catch (err) {
-        console.error("[notification] Failed to send DM:", err);
-      }
-    }
-
     const webhookUrl = process.env.NOTIFICATION_WEBHOOK_URL;
     if (webhookUrl) {
       try {
+        const mention = profile.discordUserId ? `<@${profile.discordUserId}>` : `**${profile.discordUsername}**`;
+        const channelMessage = `📣 ${mention} — new slots matched\n${messageText}`;
         await fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: messageText, username: "Golf Tee Time Alert" }),
+          body: JSON.stringify({ content: channelMessage, username: "Golf Tee Time Alert" }),
         });
         console.log("[notification] Webhook posted");
       } catch (err) {

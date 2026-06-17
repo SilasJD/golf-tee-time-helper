@@ -8,8 +8,11 @@ export interface CourseSource {
   name: string;
   city: string;
   region: string;
+  platform: "foreup" | "teeitup";
+  supportsAdvantage?: boolean;
   queryUrl: string;
   bookingUrl: string;
+  teeitupAlias?: string;
   primeWindowHours: [number, number];
   lat?: number;
   lon?: number;

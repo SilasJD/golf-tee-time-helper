@@ -1,33 +1,52 @@
-# Tier 2 Courses — TeeItUp Platform
+# TeeItUp Platform Courses
 
-These courses require a new platform adapter. TeeItUp has a structured public API similar to ForeUp, so supporting it would unlock all courses below in one implementation. The booking pattern is `https://{slug}.book.teeitup.golf`.
+TeeItUp support is fully implemented. The adapter fetches from `https://phx-api-be-east-1b.kenna.io/tee-times?date=YYYY-MM-DD&courseIds={id}` with an `x-be-alias: {slug}` header. Player filtering is client-side (`maxPlayers - bookedPlayers >= required`). Prices come from `rates[0].greenFeeWalking` and `rates[0].greenFeeRiding` (both in cents).
 
-## DC Municipal Courses (National Links Trust / playDCgolf.com)
+## Active TeeItUp Courses
 
-High weekend demand — real competition for prime morning slots. All three are operated under the same system and would come online together with one adapter.
+### DC Municipal (alias: `play-dc-golf-public`)
 
-| Course | Slug | Notes |
+| Code | Course | Notes |
 |---|---|---|
-| East Potomac Golf Links | `play-dc-golf-public` | 18-hole + 9-hole par-3, Hains Point on the Potomac. Very popular. |
-| Langston Golf Course | `play-dc-golf-public` | Historic course in NE DC. High demand. |
-| Rock Creek Golf Course | `play-dc-golf-public` | NW DC, 18 holes. Competitive weekend slots. |
+| DC1 | East Potomac Golf Links | Hains Point on the Potomac. Very high weekend demand. |
+| DC2 | Langston Golf Course | Historic course in NE DC. |
+| DC3 | Rock Creek Golf Course | NW DC, 18 holes. |
 
-Booking window: **7 days ahead** (no early-access equivalent).
-All three share the same TeeItUp tenant: `play-dc-golf-public.book.teeitup.golf`
+Booking window: 7 days ahead (no early-access window).
 
-## Carroll County
+### Fairfax County (alias: `fairfax-county-mco`)
 
-| Course | Slug | Notes |
+| Code | Course | CourseId |
 |---|---|---|
-| Westminster National Golf Course | `westminster-national-golf-club` | 18 holes, par 71, Carroll County. Affordable daily fee, moderate demand. |
+| FC1 | Laurel Hill Golf Club | 4595 |
+| FC2 | Twin Lakes Golf Course — Oaks | 7743 |
+| FC3 | Twin Lakes Golf Course — Lakes | 7756 |
+| FC4 | Jefferson District Golf Course | 17001 |
+| FC5 | Greendale Golf Course | 7742 |
+| FC6 | Burke Lake Golf Center | 3485 |
+| FC7 | Oakmont Golf Center | 17002 |
+| FC8 | Pinecrest Golf Course | 17005 |
 
-## Implementation Notes
+IDs derived from GolfNow facility URLs (same NBC Sports Next infrastructure). Confirmed: Laurel Hill = 4595 via `golfnow.com/facility/4595-laurel-hill-golf-club`.
 
-To add TeeItUp support, a new `fetchTeeItUpSlots(course, dateStr, players)` function is needed alongside the existing `fetchCourseSlots` (ForeUp). The `CourseSource` interface would need a `platform: "foreup" | "teeitup"` discriminator, and the monitor would route calls accordingly.
+### NOVA Parks (alias: `nova-parks`)
 
-TeeItUp API endpoint to investigate:
-```
-https://play-dc-golf-public.book.teeitup.golf/api/...
-```
-Capture a network request from the booking page (DevTools → Network) to identify the exact endpoint and parameters.
+| Code | Course | CourseId |
+|---|---|---|
+| NP1 | Algonkian Regional Golf Course | 1136 |
+| NP2 | Brambleton Regional Golf Course | 1137 |
+| NP3 | Pohick Bay Regional Golf Course | 1172 |
 
+### Carroll County (alias: `westminster-national-golf-club`)
+
+| Code | Course | CourseId |
+|---|---|---|
+| CA1 | Westminster National Golf Course | 11304 |
+
+ID derived from GolfNow pattern — verify at runtime that the API returns tee times. If 11304 is wrong, capture a network request from `westminster-national-golf-club.book.teeitup.golf` to find the correct courseId.
+
+## Courses Investigated But Not Added
+
+**Clustered Spires Golf Club** (Frederick, MD): Uses TeeItUp but with a MongoDB-style hex course ID (`54f14e2c0c8ad60378b04a80`) instead of a numeric ID. The `phx-api-be-east-1b.kenna.io` endpoint expects numeric IDs — hex format may not work. Do not add until verified via DevTools network capture on the booking page.
+
+**University of Maryland Golf Course**: Booking routes through Chronogolf, not ForeUp or TeeItUp. Not compatible with current adapters.

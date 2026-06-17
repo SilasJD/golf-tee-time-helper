@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"const fs=require('fs'); fs.cpSync('src/config','dist/config',{recursive:true,filter:(s)=>!s.endsWith('profiles.json')})\"",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "test": "vitest run",
